@@ -22,6 +22,11 @@ def get_vol_each_payment(stock_index, date):
     return single_tick_vol
 
 
+def get_saleorder_descend_greater_than_100_shou(stock_index, date):
+    
+    pass
+
+
 def run_demo():
     df = get_df_from_csv('/Users/zylab/haha2.csv')
     # 成交笔数
@@ -34,4 +39,4 @@ def run_demo():
 if __name__ == '__main__':
     # run_demo()
     # print(str(get_vol_each_payment('002624', '2020-03-24')))
-    get_each_tick_vol('300451', '2020-01-01', '2020-03-24')
+    get_each_tick_vol('000400', '2020-03-30', '2020-04-28')

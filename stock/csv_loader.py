@@ -24,6 +24,11 @@ def is_date_7z_exist(date_str):
 def get_df(stock_index, date):
     if date and len(date) == 10:
         # 组合路径
+        tmp_stock_path = TMP_DATA_DIR + '/' + date + '/' + stock_index + '.csv'
+        if os.path.exists(tmp_stock_path):
+            return get_df_from_csv(tmp_stock_path)
+
+        # 组合路径,还没解压过
         month = date[0:7]
         month_dir = BASE_DATA_DIR + '/' + month
         date_file_name = date + '.7z'
