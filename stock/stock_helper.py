@@ -3,6 +3,7 @@ import datetime
 from datetime import date
 
 
+#  查看某个股票 在一段时期的 每笔均量
 def get_each_tick_vol(stock_index, start_date, end_date):
     start = date.fromisoformat(start_date)
     end = date.fromisoformat(end_date)
@@ -14,17 +15,13 @@ def get_each_tick_vol(stock_index, start_date, end_date):
             print(day_str + ":" + str(vol_each_payment) + "  ")
 
 
+# 查看某个股票 某天的成交量
 def get_vol_each_payment(stock_index, date):
     df = get_df(stock_index, date)
     tick_count = len(df)
     vol_sum = df['Volume'].sum()
     single_tick_vol = (vol_sum / tick_count) / 100
     return single_tick_vol
-
-
-def get_saleorder_descend_greater_than_100_shou(stock_index, date):
-    
-    pass
 
 
 def run_demo():

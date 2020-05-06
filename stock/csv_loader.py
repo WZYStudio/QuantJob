@@ -22,6 +22,7 @@ def is_date_7z_exist(date_str):
 
 
 def get_df(stock_index, date):
+    stock_index = str(stock_index)
     if date and len(date) == 10:
         # 组合路径
         tmp_stock_path = TMP_DATA_DIR + '/' + date + '/' + stock_index + '.csv'
