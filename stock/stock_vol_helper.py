@@ -1,5 +1,7 @@
 import stock.stock_helper as stock_helper
 import pandas as pd
+import datetime
+from datetime import date
 
 
 def get_saleorder_info_greater_than_100shou(stock_index, date, is_sale=True):
@@ -30,7 +32,7 @@ def get_big_deal_descend_top10(stock_index, date, is_sale=True):
     df.sort_values(by=KEY_VOL, ascending=False, kind='quicksort', inplace=True)
     # 注意底下那个只是df的某个列去重了，df本身还是那么多项，所以是不行的！
     # df['SaleOrderID'].drop_duplicates(inplace=True)
-    df_clip_origin = df.head(20)
+    df_clip_origin = df.head(10)
 
     # 底下这个，虽然确实可以除100，但是只剩三列，别的列都没有了..这个不行
     # df_clip = df_clip[['Volume', 'SaleOrderVolume', 'BuyOrderVolume']].div(100)
@@ -72,6 +74,20 @@ def get_duplex_saleorder_info_greater_than_100shou(stock_index, date):
     get_saleorder_info_greater_than_100shou(stock_index, date, False)
 
 
+def get_sale_vol_info(stock_index, start_date, end_date):
+    start = date.fromisoformat(start_date)
+    end = date.fromisoformat(end_date)
+    for i in range((end - start).days + 1):
+        day = start + datetime.timedelta(days=i)
+        day_str = str(day)
+        if stock_helper.is_date_7z_exist(day_str):
+            print("\n---%s---" % day_str)
+            get_duplex_big_deal_descend_top10(stock_index, day_str)
+            get_duplex_saleorder_info_greater_than_100shou(stock_index, day_str)
+
+
 if __name__ == '__main__':
-    get_duplex_big_deal_descend_top10('600196', '2020-05-06')
-    get_duplex_saleorder_info_greater_than_100shou('600196', '2020-05-06')
+    # get_duplex_big_deal_descend_top10('600196', '2020-05-06')
+    # get_duplex_saleorder_info_greater_than_100shou('600196', '2020-05-06')
+
+    get_sale_vol_info('600196', '2020-04-13', '2020-05-06')
