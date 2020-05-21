@@ -2,9 +2,12 @@ import stock.stock_helper as stock_helper
 import pandas as pd
 import datetime
 from datetime import date, time
+import numpy as np
+
+np.set_printoptions(suppress=True)
 
 
-# 时间是24小时制的,比如 9:35:01, 14:25:59  ，要精确到秒 ，注意要用time.fromisoformat的话，不能是9:35：01 ，要是09:35:01 ，差个0不行..
+# 时间是24小时制的,比如 9:35:01, 14:25:59  ，要精确到秒 ，注意要用time.fromisoformat的话，不能是9:35：01 ，要是09:35:01 ，差个0不行..这个用zfill函数
 def get_order_descend_time_interval_single_day(stock_index, date, begin_time, end_time, is_sale=True):
     df = stock_helper.get_df(stock_index, date)
     KEY_ID = 'SaleOrderID' if (is_sale) else 'BuyOrderID'
@@ -29,7 +32,7 @@ def get_saleorder_info_greater_than_100shou(stock_index, date, is_sale=True):
     df_copy = df.copy()
     df_copy.loc[:, ['Volume', 'SaleOrderVolume', 'BuyOrderVolume']] = df_copy.loc[:, ['Volume', 'SaleOrderVolume',
                                                                                       'BuyOrderVolume']].div(100)
-    df_copy = df_copy[df_copy[KEY_VOL] >= 300]
+    df_copy = df_copy[df_copy[KEY_VOL] >= 100]
 
     order_count = df_copy.size
     order_sum = df_copy[KEY_VOL].sum()
@@ -37,7 +40,7 @@ def get_saleorder_info_greater_than_100shou(stock_index, date, is_sale=True):
     print("300手以上的总" + ("卖" if is_sale else "买") + "单数为%d, 总手数为%d" % (order_count, order_sum))
 
 
-def get_big_deal_descend_top10(stock_index, date, is_sale=True):
+def get_top_big_deal_descend(stock_index, date, head_value=10, is_sale=True, time_sort=True, is_brief=False):
     df = stock_helper.get_df(stock_index, date)
     KEY_ID = 'SaleOrderID' if (is_sale) else 'BuyOrderID'
     KEY_VOL = 'SaleOrderVolume' if (is_sale) else 'BuyOrderVolume'
@@ -47,7 +50,7 @@ def get_big_deal_descend_top10(stock_index, date, is_sale=True):
     df.sort_values(by=KEY_VOL, ascending=False, kind='quicksort', inplace=True)
     # 注意底下那个只是df的某个列去重了，df本身还是那么多项，所以是不行的！
     # df['SaleOrderID'].drop_duplicates(inplace=True)
-    df_clip_origin = df.head(30)
+    df_clip_origin = df.copy().head(head_value)
 
     # 底下这个，虽然确实可以除100，但是只剩三列，别的列都没有了..这个不行
     # df_clip = df_clip[['Volume', 'SaleOrderVolume', 'BuyOrderVolume']].div(100)
@@ -62,6 +65,10 @@ def get_big_deal_descend_top10(stock_index, date, is_sale=True):
     df_clip = df_clip_origin.copy()
     df_clip.loc[:, ['Volume', 'SaleOrderVolume', 'BuyOrderVolume']] = df_clip.loc[:, ['Volume', 'SaleOrderVolume',
                                                                                       'BuyOrderVolume']].div(100)
+    # df_clip.loc[:, ['Time']] = df_clip.loc[:, ['Time']].zfill(8)
+
+    # 时间加0这个就处理好了
+    df_clip['Time'] = df['Time'].apply(lambda x: x.zfill(8))
 
     # 计算前10大卖单的总和
 
@@ -70,18 +77,30 @@ def get_big_deal_descend_top10(stock_index, date, is_sale=True):
     pd.set_option("display.max_columns", 11)
 
     # print('finish:' + str(df_clip))
+    sum_value = df_clip.SaleOrderVolume.sum() if is_sale else df_clip.BuyOrderVolume.sum()
 
-    if is_sale:
-        print('前10大卖单总和为:' + str(df_clip.SaleOrderVolume.sum()))
-    else:
-        print('前10大买单总和为:' + str(df_clip.BuyOrderVolume.sum()))
+    print('前' + str(head_value) + '大' + ('卖单' if is_sale else '买单') + "总和为:" + str(sum_value))
 
-    print(df_clip)
+    # if is_sale:
+    #     print('前10大卖单总和为:' + str(sum_value))
+    # else:
+    #     print('前10大买单总和为:' + str(sum_value))
+
+    if not is_brief:
+        if time_sort:
+            df_clip.sort_values(by='Time', ascending=True, kind='quicksort', inplace=True)
+        print(df_clip)
+
+    return sum_value
 
 
-def get_duplex_big_deal_descend_top10(stock_index, date):
-    get_big_deal_descend_top10(stock_index, date)
-    get_big_deal_descend_top10(stock_index, date, False)
+def get_duplex_top_big_deal(stock_index, date, head_value=10, is_time_sort=True, is_brief=False):
+    sale_sum = get_top_big_deal_descend(stock_index, date, head_value, is_sale=True, time_sort=is_time_sort, is_brief=is_brief)
+    buy_sum = get_top_big_deal_descend(stock_index, date, head_value, is_sale=False, time_sort=is_time_sort, is_brief=is_brief)
+
+    diff = buy_sum - sale_sum
+
+    print(date + (' 流入:' if diff > 0 else " 流出:") + str(abs(diff)))
 
 
 def get_duplex_saleorder_info_greater_than_100shou(stock_index, date):
@@ -97,22 +116,12 @@ def get_sale_vol_info_multi_day(stock_index, start_date, end_date):
         day_str = str(day)
         if stock_helper.is_date_7z_exist(day_str):
             print("\n---%s---" % day_str)
-            get_duplex_big_deal_descend_top10(stock_index, day_str)
-            get_duplex_saleorder_info_greater_than_100shou(stock_index, day_str)
+            get_duplex_top_big_deal(stock_index, day_str, is_brief=True)
+            # get_duplex_saleorder_info_greater_than_100shou(stock_index, day_str)
 
 
 if __name__ == '__main__':
-    get_duplex_big_deal_descend_top10('603986', '2020-05-07')
-    # get_duplex_saleorder_info_greater_than_100shou('603986', '2020-05-07')
+    get_duplex_top_big_deal('600584', '2020-05-21',head_value=10, is_brief=False)
+    # get_duplex_saleorder_info_greater_than_100shou('300463', '2020-05-20')
 
-    # get_sale_vol_info_multi_day('600196', '2020-04-13', '2020-05-06'
-    #
-    # my_time = time.fromisoformat('09:30:02')
-    # my_time2 = time.fromisoformat('10:30:01')
-    #
-    #
-    #
-    # if my_time > my_time2:
-    #     print('true')
-    # else:
-    #     print('false')
+    # get_sale_vol_info_multi_day('600584', '2020-04-27', '2020-05-21')
