@@ -1,4 +1,4 @@
-import tushare as ts
+import tushare_native as ts
 
 print(ts.__version__)
 

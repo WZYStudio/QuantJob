@@ -95,12 +95,24 @@ def get_top_big_deal_descend(stock_index, date, head_value=10, is_sale=True, tim
 
 
 def get_duplex_top_big_deal(stock_index, date, head_value=10, is_time_sort=True, is_brief=False):
-    sale_sum = get_top_big_deal_descend(stock_index, date, head_value, is_sale=True, time_sort=is_time_sort, is_brief=is_brief)
-    buy_sum = get_top_big_deal_descend(stock_index, date, head_value, is_sale=False, time_sort=is_time_sort, is_brief=is_brief)
+    sale_sum = get_top_big_deal_descend(stock_index, date, head_value, is_sale=True, time_sort=is_time_sort,
+                                        is_brief=is_brief)
+    buy_sum = get_top_big_deal_descend(stock_index, date, head_value, is_sale=False, time_sort=is_time_sort,
+                                       is_brief=is_brief)
 
     diff = buy_sum - sale_sum
 
-    print(date + (' 流入:' if diff > 0 else " 流出:") + str(abs(diff)))
+    # diff 占有较少deal_sum的比例
+    percentage = abs(diff) / (buy_sum if buy_sum > sale_sum else sale_sum)
+    percentage_round = round(percentage, 3)
+
+    print(date + (' 流入:' if diff > 0 else " 流出:") + str(abs(diff)) + ',占小成交方向比例为:' + str(percentage_round))
+
+    return {'date': date, 'stock': stock_index, 'buy_sum': buy_sum, 'sale_sum': sale_sum, 'diff': diff}
+
+
+def get_duplex_top_deal_df(stock_index, date, head_value=10, is_time_sort=True, is_brief=False):
+    pass
 
 
 def get_duplex_saleorder_info_greater_than_100shou(stock_index, date):
@@ -108,20 +120,23 @@ def get_duplex_saleorder_info_greater_than_100shou(stock_index, date):
     get_saleorder_info_greater_than_100shou(stock_index, date, False)
 
 
-def get_sale_vol_info_multi_day(stock_index, start_date, end_date):
+def get_sale_vol_info_multi_day(stock_index, start_date, end_date, head_value=20):
     start = date.fromisoformat(start_date)
     end = date.fromisoformat(end_date)
+    deal_list = []
     for i in range((end - start).days + 1):
         day = start + datetime.timedelta(days=i)
         day_str = str(day)
         if stock_helper.is_date_7z_exist(day_str):
             print("\n---%s---" % day_str)
-            get_duplex_top_big_deal(stock_index, day_str, is_brief=True)
+            data = get_duplex_top_big_deal(stock_index, day_str, head_value, is_brief=True)
+            deal_list.append(data)
             # get_duplex_saleorder_info_greater_than_100shou(stock_index, day_str)
+    return deal_list
 
 
 if __name__ == '__main__':
-    get_duplex_top_big_deal('600584', '2020-05-21',head_value=10, is_brief=False)
+    get_duplex_top_big_deal('002661', '2020-05-28', head_value=20, is_time_sort=True, is_brief=False)
     # get_duplex_saleorder_info_greater_than_100shou('300463', '2020-05-20')
 
-    # get_sale_vol_info_multi_day('600584', '2020-04-27', '2020-05-21')
+    # get_sale_vol_info_multi_day('600584', '2020-05-19', '2020-05-27', 10)
