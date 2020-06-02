@@ -41,9 +41,33 @@ def get_saleorder_info_greater_than_100shou(stock_index, date, is_sale=True):
 
 
 def get_top_big_deal_descend(stock_index, date, head_value=10, is_sale=True, time_sort=True, is_brief=False):
+    # 计算前10大卖单的总和
+
+    df = get_duplex_top_deal_dataframe(stock_index, date, head_value, is_sale, time_sort, is_brief)
+    # 这是设置DataFrame在console中的显示
+    pd.set_option('precision', 0)
+    pd.set_option("display.max_columns", 11)
+
+    # print('finish:' + str(df_clip))
+    sum_value = df.SaleOrderVolume.sum() if is_sale else df.BuyOrderVolume.sum()
+
+    print('前' + str(head_value) + '大' + ('卖单' if is_sale else '买单') + "总和为:" + str(sum_value))
+
+    # if is_sale:
+    #     print('前10大卖单总和为:' + str(sum_value))
+    # else:
+    #     print('前10大买单总和为:' + str(sum_value))
+
+    if not is_brief:
+        print(df)
+
+    return sum_value
+
+
+def get_duplex_top_deal_dataframe(stock_index, date, head_value=10, is_sale=True, is_time_sort=True, is_brief=False):
     df = stock_helper.get_df(stock_index, date)
-    KEY_ID = 'SaleOrderID' if (is_sale) else 'BuyOrderID'
-    KEY_VOL = 'SaleOrderVolume' if (is_sale) else 'BuyOrderVolume'
+    KEY_ID = 'SaleOrderID' if is_sale else 'BuyOrderID'
+    KEY_VOL = 'SaleOrderVolume' if is_sale else 'BuyOrderVolume'
 
     df.drop_duplicates(subset=[KEY_ID], keep='last', inplace=True)
 
@@ -69,29 +93,9 @@ def get_top_big_deal_descend(stock_index, date, head_value=10, is_sale=True, tim
 
     # 时间加0这个就处理好了
     df_clip['Time'] = df['Time'].apply(lambda x: x.zfill(8))
-
-    # 计算前10大卖单的总和
-
-    # 这是设置DataFrame在console中的显示
-    pd.set_option('precision', 0)
-    pd.set_option("display.max_columns", 11)
-
-    # print('finish:' + str(df_clip))
-    sum_value = df_clip.SaleOrderVolume.sum() if is_sale else df_clip.BuyOrderVolume.sum()
-
-    print('前' + str(head_value) + '大' + ('卖单' if is_sale else '买单') + "总和为:" + str(sum_value))
-
-    # if is_sale:
-    #     print('前10大卖单总和为:' + str(sum_value))
-    # else:
-    #     print('前10大买单总和为:' + str(sum_value))
-
-    if not is_brief:
-        if time_sort:
-            df_clip.sort_values(by='Time', ascending=True, kind='quicksort', inplace=True)
-        print(df_clip)
-
-    return sum_value
+    if is_time_sort:
+        df_clip.sort_values(by='Time', ascending=True, kind='quicksort', inplace=True)
+    return df_clip
 
 
 def get_duplex_top_big_deal(stock_index, date, head_value=10, is_time_sort=True, is_brief=False):
@@ -109,10 +113,6 @@ def get_duplex_top_big_deal(stock_index, date, head_value=10, is_time_sort=True,
     print(date + (' 流入:' if diff > 0 else " 流出:") + str(abs(diff)) + ',占小成交方向比例为:' + str(percentage_round))
 
     return {'date': date, 'stock': stock_index, 'buy_sum': buy_sum, 'sale_sum': sale_sum, 'diff': diff}
-
-
-def get_duplex_top_deal_df(stock_index, date, head_value=10, is_time_sort=True, is_brief=False):
-    pass
 
 
 def get_duplex_saleorder_info_greater_than_100shou(stock_index, date):
@@ -136,7 +136,7 @@ def get_sale_vol_info_multi_day(stock_index, start_date, end_date, head_value=20
 
 
 if __name__ == '__main__':
-    get_duplex_top_big_deal('002661', '2020-05-28', head_value=20, is_time_sort=True, is_brief=False)
+    get_duplex_top_big_deal('603301', '2020-05-25', head_value=20, is_time_sort=False, is_brief=False)
     # get_duplex_saleorder_info_greater_than_100shou('300463', '2020-05-20')
 
     # get_sale_vol_info_multi_day('600584', '2020-05-19', '2020-05-27', 10)

@@ -36,4 +36,4 @@ def run_demo():
 if __name__ == '__main__':
     # run_demo()
     # print(str(get_vol_each_payment('002624', '2020-03-24')))
-    get_each_tick_vol('300463', '2020-05-06', '2020-05-19')
+    get_each_tick_vol('600859', '2020-03-17', '2020-05-19')
