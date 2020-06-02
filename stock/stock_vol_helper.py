@@ -64,8 +64,10 @@ def get_top_big_deal_descend(stock_index, date, head_value=10, is_sale=True, tim
     return sum_value
 
 
-def get_duplex_top_deal_dataframe(stock_index, date, head_value=10, is_sale=True, is_time_sort=True, is_brief=False):
-    df = stock_helper.get_df(stock_index, date)
+def get_duplex_top_deal_dataframe(stock_index, date, head_value=10, is_sale=True, is_time_sort=True, is_brief=False,
+                                  df=None):
+    if df is None:
+        df = stock_helper.get_df(stock_index, date)
     KEY_ID = 'SaleOrderID' if is_sale else 'BuyOrderID'
     KEY_VOL = 'SaleOrderVolume' if is_sale else 'BuyOrderVolume'
 
@@ -136,7 +138,7 @@ def get_sale_vol_info_multi_day(stock_index, start_date, end_date, head_value=20
 
 
 if __name__ == '__main__':
-    get_duplex_top_big_deal('603301', '2020-05-25', head_value=20, is_time_sort=False, is_brief=False)
+    get_duplex_top_big_deal('600196', '2020-06-02', head_value=20, is_time_sort=False, is_brief=False)
     # get_duplex_saleorder_info_greater_than_100shou('300463', '2020-05-20')
 
     # get_sale_vol_info_multi_day('600584', '2020-05-19', '2020-05-27', 10)
