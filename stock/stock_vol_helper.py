@@ -3,6 +3,7 @@ import pandas as pd
 import datetime
 from datetime import date, time
 import numpy as np
+import math
 
 np.set_printoptions(suppress=True)
 
@@ -112,9 +113,16 @@ def get_duplex_top_big_deal(stock_index, date, head_value=10, is_time_sort=True,
     percentage = abs(diff) / (buy_sum if buy_sum > sale_sum else sale_sum)
     percentage_round = round(percentage, 3)
 
-    print(date + (' 流入:' if diff > 0 else " 流出:") + str(abs(diff)) + ',占小成交方向比例为:' + str(percentage_round))
+    desc = date + (' 流入:' if diff > 0 else " 流出:") + str(abs(diff)) + ',占小成交方向比例为:' + str(percentage_round)
+    desc_en = date + '  ' + str(stock_index) + '   inflow:' + str(math.floor(buy_sum)) + '  outflow:' + str(
+        math.floor(sale_sum)) + (
+                  '  net inflow:' if diff > 0 else '  net outflow:') + str(
+        math.floor(abs(diff))) + '  Proportion of small deal:' + str(
+        percentage_round)
+    print(desc)
 
-    return {'date': date, 'stock': stock_index, 'buy_sum': buy_sum, 'sale_sum': sale_sum, 'diff': diff}
+    return {'date': date, 'stock': stock_index, 'buy_sum': buy_sum, 'sale_sum': sale_sum, 'diff': diff, 'desc': desc,
+            'desc_en': desc_en}
 
 
 def get_duplex_saleorder_info_greater_than_100shou(stock_index, date):
@@ -138,7 +146,7 @@ def get_sale_vol_info_multi_day(stock_index, start_date, end_date, head_value=20
 
 
 if __name__ == '__main__':
-    get_duplex_top_big_deal('600196', '2020-06-02', head_value=20, is_time_sort=False, is_brief=False)
+    get_duplex_top_big_deal('600196', '2020-06-03', head_value=20, is_time_sort=True, is_brief=False)
     # get_duplex_saleorder_info_greater_than_100shou('300463', '2020-05-20')
 
     # get_sale_vol_info_multi_day('600584', '2020-05-19', '2020-05-27', 10)

@@ -29,6 +29,9 @@ def get_df(stock_index, date):
         if os.path.exists(tmp_stock_path):
             return get_df_from_csv(tmp_stock_path)
 
+        if not os.path.exists(TMP_DATA_DIR):
+            os.makedirs(TMP_DATA_DIR)
+
         # 组合路径,还没解压过
         month = date[0:7]
         month_dir = BASE_DATA_DIR + '/' + month

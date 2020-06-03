@@ -43,7 +43,7 @@ def get_tick_high_low_open_close_price(stock_index, date, df=None):
 
     last_row_index = df.shape[0] - 1
     open_price = df['Price'][0]
-    close_price = df['Price'][last_row_index]
+    close_price = df['Price'].values[last_row_index]
 
     print('high low open close price:' + str(high_val) + "|" + str(low_val) + "|" + str(open_price) + "|" + str(
         close_price))
