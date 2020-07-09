@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import shutil
 
 os.environ['LA_LIBRARY_FILEPATH'] = '/usr/local/opt/libarchive/lib/libarchive.dylib'
 import libarchive.public
@@ -19,6 +20,17 @@ def is_date_7z_exist(date_str):
     if month:
         support_path = BASE_DATA_DIR + '/' + month + '/' + date_str + ".7z"
         return os.path.exists(support_path)
+
+
+def make_sure_tmp_dir():
+    if not os.path.exists(TMP_DATA_DIR):
+        os.makedirs(TMP_DATA_DIR)
+
+
+def re_create_tmp_dir():
+    # 梯归的删除tmp文件夹和所有子文件夹
+    shutil.rmtree(TMP_DATA_DIR)
+    make_sure_tmp_dir()
 
 
 def get_df(stock_index, date):
@@ -73,5 +85,21 @@ def uncompress7z(stock_index, date_7z_file):
                 return pure_entry_name
 
 
+def uncompress_daily_7z_to_tmp_dir(file_7z_path):
+    compress_file_pure_name = file_7z_path.split('.')[0].split('/')[-1]
+    tmp_daily_dir = TMP_DATA_DIR + "/" + compress_file_pure_name
+    make_sure_tmp_dir()
+    # 清空一下要占有的目录
+    if os.path.isdir(tmp_daily_dir):
+        shutil.rmtree(tmp_daily_dir)
+    os.chdir(TMP_DATA_DIR)
+    # 一定要循环一下能解压， 只调用libarchive.public.file_pour(file_7z_path) ,是不行的
+    for entry in libarchive.public.file_pour(file_7z_path):
+        print('entry.path name is:' + entry.pathname)
+    print('tmp_daily_dir is:' + tmp_daily_dir)
+    return tmp_daily_dir
+
+
 if __name__ == '__main__':
-    uncompress7z('000002', '/Users/zylab/2020-03-23.7z')
+    uncompress7z('000002', '/Users/zylab/1_Develop/10_StockData/2020-07/2020-07-08.7z')
+    # uncompress_daily_7z_to_tmp_dir('/Users/zylab/1_Develop/10_StockData/2020-07/2020-07-08.7z')
