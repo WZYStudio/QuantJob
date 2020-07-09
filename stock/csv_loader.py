@@ -44,6 +44,8 @@ def get_df(stock_index, date):
 
 def get_df_from_csv(csv_path):
     df = pd.read_csv(csv_path)
+    # 股票数 改为 手数
+    df.loc[:, ['Volume', 'SaleOrderVolume', 'BuyOrderVolume']] = df.loc[:, ['Volume', 'SaleOrderVolume', 'BuyOrderVolume']].div(100)
     return df
 
 

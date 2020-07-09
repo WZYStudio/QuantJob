@@ -17,9 +17,6 @@ def get_order_descend_time_interval_single_day(stock_index, date, begin_time, en
     df.drop_duplicates(subset=[KEY_ID], keep='last', inplace=True)
     df.sort_values(by=KEY_VOL, ascending=False, kind='quicksort', inplace=True)
     df_copy = df.copy()
-    df_copy.loc[:, ['Volume', 'SaleOrderVolume', 'BuyOrderVolume']] = df_copy.loc[:, ['Volume', 'SaleOrderVolume',
-                                                                                      'BuyOrderVolume']].div(100)
-
     pass
 
 
@@ -31,8 +28,6 @@ def get_saleorder_info_greater_than_100shou(stock_index, date, is_sale=True):
     df.drop_duplicates(subset=[KEY_ID], keep='last', inplace=True)
     df.sort_values(by=KEY_VOL, ascending=False, kind='quicksort', inplace=True)
     df_copy = df.copy()
-    df_copy.loc[:, ['Volume', 'SaleOrderVolume', 'BuyOrderVolume']] = df_copy.loc[:, ['Volume', 'SaleOrderVolume',
-                                                                                      'BuyOrderVolume']].div(100)
     df_copy = df_copy[df_copy[KEY_VOL] >= 100]
 
     order_count = df_copy.size
@@ -90,8 +85,6 @@ def get_duplex_top_deal_dataframe(stock_index, date, head_value=10, is_sale=True
     #     ['Volume', 'SaleOrderVolume', 'BuyOrderVolume']].div(100)
 
     df_clip = df_clip_origin.copy()
-    df_clip.loc[:, ['Volume', 'SaleOrderVolume', 'BuyOrderVolume']] = df_clip.loc[:, ['Volume', 'SaleOrderVolume',
-                                                                                      'BuyOrderVolume']].div(100)
     # df_clip.loc[:, ['Time']] = df_clip.loc[:, ['Time']].zfill(8)
 
     # 时间加0这个就处理好了
@@ -146,7 +139,6 @@ def get_sale_vol_info_multi_day(stock_index, start_date, end_date, head_value=20
 
 
 if __name__ == '__main__':
-    get_duplex_top_big_deal('600196', '2020-06-03', head_value=20, is_time_sort=True, is_brief=False)
+    get_duplex_top_big_deal('002074', '2020-07-02', head_value=15, is_time_sort=True, is_brief=False)
     # get_duplex_saleorder_info_greater_than_100shou('300463', '2020-05-20')
-
-    # get_sale_vol_info_multi_day('600584', '2020-05-19', '2020-05-27', 10)
+    # get_sale_vol_info_multi_day('300242', '2020-03-10', '2020-04-29', 20)

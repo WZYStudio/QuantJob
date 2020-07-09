@@ -8,6 +8,7 @@ import matplotlib.dates as mdates
 from datetime import datetime, timedelta
 from datetime import time as module_time
 import matplotlib.ticker as ticker
+from stock import mysql_loader
 
 # 基本的东西
 
@@ -36,6 +37,9 @@ def draw_sale_vol_info_multiday(stock_index, start_date, end_date, head_value=20
 
 def draw_duplex_top_big_deal(stock_index, date, top_count):
     df = stock_helper.get_df(stock_index, date)
+    # 注意mysql里的 成交量是手，不是股，不用再除100了
+    # df = mysql_loader.get_df_from_mysql(stock_index, date)
+
     sale_df = vol_helper.get_duplex_top_deal_dataframe(stock_index, date, head_value=top_count, is_sale=True, df=df)
     sale_df['Action'] = 'sale'
     buy_df = vol_helper.get_duplex_top_deal_dataframe(stock_index, date, head_value=top_count, is_sale=False, df=df)
@@ -177,5 +181,5 @@ def draw_duplex_top_big_deal(stock_index, date, top_count):
 
 
 if __name__ == '__main__':
-    # draw_sale_vol_info_multiday('603301', '2020-05-12', '2020-05-29')
-    draw_duplex_top_big_deal('600196', '2020-06-03', 20)
+    # draw_sale_vol_info_multiday('000063', '2020-06-16', '2020-06-23')
+    draw_duplex_top_big_deal('600196', '2020-07-08', 15)
