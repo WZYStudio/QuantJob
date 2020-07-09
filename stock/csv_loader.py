@@ -9,6 +9,10 @@ BASE_DATA_DIR = '/Users/zylab/1_Develop/10_StockData'
 TMP_DATA_DIR = BASE_DATA_DIR + '/TMP'
 
 
+def get_month_data_dir(month_str):
+    return BASE_DATA_DIR + "/" + month_str
+
+
 def get_month_by_date(date):
     if date and len(date) == 10:
         month = date[0:7]

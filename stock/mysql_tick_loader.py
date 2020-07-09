@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
 import stock.csv_loader as csv_loader
+from stock.csv_loader import get_month_data_dir
 import pandas as pd
 import numpy as np
 import os
@@ -68,10 +69,6 @@ def daily_csv_files_to_db(date_str, daily_tmp_dir):
             full_path = os.path.join(daily_tmp_dir, file)
             stock_index = file.partition('.')[0]
             stock_csv_to_db(stock_index, date_str, full_path)
-
-
-def get_month_data_dir(month_str):
-    return csv_loader.BASE_DATA_DIR + "/" + month_str
 
 
 def load_csv_to_db_per_month(month_str):
