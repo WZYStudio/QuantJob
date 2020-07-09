@@ -108,4 +108,5 @@ if __name__ == '__main__':
     # stock_csv_to_db('600196', '2020-07-08')
     # loop_csv_to_db_per_month('2020-07')
     process = Process(target=load_csv_to_db_per_month('2020-07'))
+
     process.start()
