@@ -28,7 +28,7 @@ def get_saleorder_info_greater_than_100shou(stock_index, date, is_sale=True):
     df.drop_duplicates(subset=[KEY_ID], keep='last', inplace=True)
     df.sort_values(by=KEY_VOL, ascending=False, kind='quicksort', inplace=True)
     df_copy = df.copy()
-    df_copy = df_copy[df_copy[KEY_VOL] >= 100]
+    df_copy = df_copy[df_copy[KEY_VOL] >= 500]
 
     order_count = df_copy.size
     order_sum = df_copy[KEY_VOL].sum()
@@ -139,6 +139,6 @@ def get_sale_vol_info_multi_day(stock_index, start_date, end_date, head_value=20
 
 
 if __name__ == '__main__':
-    get_duplex_top_big_deal('002074', '2020-07-02', head_value=15, is_time_sort=True, is_brief=False)
-    # get_duplex_saleorder_info_greater_than_100shou('300463', '2020-05-20')
+    get_duplex_top_big_deal('002459', '2020-07-10', head_value=15, is_time_sort=True, is_brief=False)
+    # get_duplex_saleorder_info_greater_than_100shou('002459', '2020-07-10')
     # get_sale_vol_info_multi_day('300242', '2020-03-10', '2020-04-29', 20)

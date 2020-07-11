@@ -9,7 +9,9 @@ from multiprocessing import Process, Queue
 
 np.set_printoptions(suppress=True)
 
-TICK_PREFIX = 'Tick_'
+TICK_PREFIX = 'Tick2_'
+
+db_engine = None
 
 
 def get_db_url(db_name):
@@ -20,22 +22,23 @@ def get_db_name(date_str):
     return TICK_PREFIX + date_str
 
 
-def make_db_by_datestr(date_str, engine=None):
+def make_db_by_datestr(date_str):
     # 依照日期  创建并使用库
     db_name = get_db_name(date_str)
     url = get_db_url(db_name)
 
-    if not engine:
-        engine = create_engine(url, echo=True)
+    global db_engine
+    if not db_engine:
+        db_engine = create_engine(url, echo=True)
 
     if not database_exists(url):
         create_database(url)
 
     # 非常寸、带横杠的数据库名，要用反引号 引上才可以用， 否则sql报错
     use_db_dialect = 'USE ' + "`" + db_name + "`"
-    engine.execute(use_db_dialect)
+    db_engine.execute(use_db_dialect)
 
-    return engine
+    return db_engine
 
 
 def get_df_from_mysql(stock_index, date_str):
@@ -102,8 +105,8 @@ def load_csv_to_db_daily(month_str, daily_7z_file_name):
 
 
 if __name__ == '__main__':
-    # stock_csv_to_db('600196', '2020-07-08')
+    stock_csv_to_db('600196', '2020-07-08')
     # loop_csv_to_db_per_month('2020-07')
-    process = Process(target=load_csv_to_db_per_month('2020-07'))
-
-    process.start()
+    # process = Process(target=load_csv_to_db_per_month('2020-07'))
+    # process = Process(target=load_csv_to_db_daily('2020-07', '2020-07-06.7z'))
+    # process.start()
