@@ -1,3 +1,4 @@
+import sqlalchemy
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
 import stock.csv_loader as csv_loader
@@ -58,8 +59,25 @@ def stock_csv_to_db(stock_index, date_str, stock_csv_path=None):
         df = csv_loader.get_df(stock_index, date_str)
     table_name = str(stock_index)
 
-    # 不得不说，就这样就挺好..
+    # 这个已经是我最小的， 不写这个dtype是14M，写了之后是12M ， 还是不能改变形势
+    # dtype = {'TranID': sqlalchemy.types.INTEGER(),
+    #          'Time': sqlalchemy.types.CHAR(length=8),
+    #          'Price': sqlalchemy.types.DECIMAL(10, 2),
+    #          'SaleOrderPrice': sqlalchemy.types.DECIMAL(10, 2),
+    #          'BuyOrderPrice': sqlalchemy.types.DECIMAL(10, 2),
+    #          'Volume': sqlalchemy.types.Integer(),
+    #          'Type': sqlalchemy.types.CHAR(1),
+    #          'SaleOrderVolume': sqlalchemy.types.Integer(),
+    #          'BuyOrderVolume': sqlalchemy.types.Integer(),
+    #          'SaleOrderID': sqlalchemy.types.Integer(),
+    #          'BuyOrderID': sqlalchemy.types.Integer(),
+    #          }
+
+    # df.to_sql(table_name, engine, if_exists='replace', index=False, dtype=dtype)
+
+    # 一句话写进db
     df.to_sql(table_name, engine, if_exists='replace', index=False)
+
     # 这个是用来检测数据的
     # df_tmp = new_df.head(20)
     # print(df_tmp.loc[:, ['Volume', 'SaleOrderVolume', 'BuyOrderVolume']])
