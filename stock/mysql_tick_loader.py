@@ -49,7 +49,7 @@ def get_df_from_mysql(stock_index, date_str):
     return df
 
 
-def stock_csv_to_db(stock_index, date_str, stock_csv_path):
+def stock_csv_to_db(stock_index, date_str, stock_csv_path=None):
     engine = make_db_by_datestr(date_str)
 
     if stock_csv_path:
