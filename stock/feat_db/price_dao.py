@@ -54,8 +54,7 @@ class Quotation(SqlAlchemy_Base_Model):
     __abstract__ = True  # 关键语句,定义所有数据库表对应的父类
     __table_args__ = {"extend_existing": True}  # 允许表已存在
 
-    id = Column(Integer, primary_key=True)
-
+    row_code = Column(String(25), primary_key=True)
     attr_name = Column(String(25), nullable=False)
     stock_index = Column(String(6), nullable=False)
     # date = Column(Date, nullable=False), 一天一个表，不用date都行，时间都在表名上了
@@ -73,8 +72,8 @@ class Quotation(SqlAlchemy_Base_Model):
 
         self.stock_index = kwargs['stock_index']
         self.attr_name = self.stock_index + "_min_15"
-        self.date = str(time_obj.date())
         self.seq_index = get_sequence_by_time(the_time)
+        self.row_code = self.attr_name + "_" + str(self.seq_index)
         self.open = float(kwargs['open'])
         self.close = float(kwargs['close'])
         self.high = float(kwargs['high'])

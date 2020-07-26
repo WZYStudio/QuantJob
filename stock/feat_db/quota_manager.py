@@ -29,11 +29,8 @@ def get_db_session():
     return session
 
 
-# 第一次初始化单支股票的数据, 就是下载16x26个15min行情 到数据库
-def init_market_data(stock_index: str):
-    data_dict = sina_loader.get_sina_quotation_dict_list(stock_index, '15', '20')
-
-    for item in data_dict:
+def input_dict_to_db(stock_index: str, dict_data):
+    for item in dict_data:
         time_str = item['day']
         time_obj = datetime.fromisoformat(time_str)
         item['date'] = date_str = str(time_obj.date())
@@ -45,12 +42,21 @@ def init_market_data(stock_index: str):
         get_db_session().add(table_obj)
 
     price_dao.Quotation.create_all_tables(get_db_engine())
-    get_db_session().commit()
+    try:
+        get_db_session().commit()
+    except Exception as err:
+        print('DB_ERR:' + str(err))
+
     get_db_session().close()
 
-    return
+
+# 第一次初始化单支股票的数据, 就是下载16x26个15min行情 到数据库
+def init_market_data(stock_index: str):
+    dict_data = sina_loader.get_sina_quotation_dict_list(stock_index, '15', '20')
+    input_dict_to_db(stock_index, dict_data)
 
 
 if __name__ == "__main__":
     # get_favor_stock_list()
     init_market_data('002074')
+    init_market_data('300465')
