@@ -182,4 +182,4 @@ def draw_duplex_top_big_deal(stock_index, date, top_count):
 
 if __name__ == '__main__':
     # draw_sale_vol_info_multiday('002459', '2020-07-01', '2020-07-10')
-    draw_duplex_top_big_deal('300463', '2020-07-17', 20)
+    draw_duplex_top_big_deal('002074', '2020-07-24', 20)

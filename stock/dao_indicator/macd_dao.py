@@ -34,9 +34,6 @@ class MACDBlock(KLineBlock):
     def val(self, diff, dea, macd):
         self._val = (diff, dea, macd)
 
-
-class MACD_DAO(object):
-
     @staticmethod
     def get_blocks_list(my_type: MACDType, end_date, end_index, count=20):
         pass
