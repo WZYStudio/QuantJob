@@ -47,7 +47,8 @@ def input_dict_to_db(stock_index: str, dict_data):
     except Exception as err:
         print('DB_ERR:' + str(err))
 
-    get_db_session().close()
+    finally:
+        get_db_session().close()
 
 
 # 第一次初始化单支股票的数据, 就是下载16x26个15min行情 到数据库
