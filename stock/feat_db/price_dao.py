@@ -1,10 +1,9 @@
-from stock.dao_indicator.base_types import IndicatorType, KLineBlock
+from stock.feat_db.base_types import IndicatorType, KLineBlock
 from enum import Enum, unique
-from sqlalchemy import Column, Integer, INTEGER, String, Date, DECIMAL
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import Column, Integer, String, DECIMAL
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
-from stock.dao_indicator.base_types import TIME_DELTA_LIST
+from stock.feat_db.base_types import TIME_DELTA_LIST
 
 price_table_cls_dict = {}
 
@@ -27,27 +26,28 @@ class PriceType(Enum):
 SqlAlchemy_Base_Model = declarative_base()
 
 
-class PriceBlock(KLineBlock, SqlAlchemy_Base_Model):
-
-    def __init__(self, my_type):
-        super(self, my_type)
-        self._start_price, self._end_price, self._vol, self._index, self._date_str = None
-        if self._type not in PriceType:
-            raise ValueError('invalid macd type: %d' % self._type)
-
-    def set_index(self, date_str, index):
-        self._index = index
-        self._date_str = date_str
-
-    @property
-    def val(self):
-        return (self._start_price, self._end_price, self._vol)
-
-    @property.setter
-    def val(self, start_price, end_price, vol):
-        self._start_price = start_price
-        self._end_price = end_price
-        self._vol = vol
+# 这里边错还挺多的，先搞别的
+# class PriceBlock(KLineBlock, SqlAlchemy_Base_Model):
+#
+#     def __init__(self, my_type):
+#         super(self, my_type)
+#         self._start_price, self._end_price, self._vol, self._index, self._date_str = None
+#         if self._type not in PriceType:
+#             raise ValueError('invalid macd type: %d' % self._type)
+#
+#     def set_index(self, date_str, index):
+#         self._index = index
+#         self._date_str = date_str
+#
+#     @property
+#     def val(self):
+#         return (self._start_price, self._end_price, self._vol)
+#
+#     @property.setter
+#     def val(self, start_price, end_price, vol):
+#         self._start_price = start_price
+#         self._end_price = end_price
+#         self._vol = vol
 
 
 class Quotation(SqlAlchemy_Base_Model):
@@ -57,22 +57,22 @@ class Quotation(SqlAlchemy_Base_Model):
     id = Column(Integer, primary_key=True)
 
     attr_name = Column(String(25), nullable=False)
-    stock_index = Column(Integer, nullable=False)
+    stock_index = Column(String(6), nullable=False)
     # date = Column(Date, nullable=False), 一天一个表，不用date都行，时间都在表名上了
-    seq_index = Column(INTEGER(3), nullable=False)
+    seq_index = Column(Integer, nullable=False)
     open = Column(DECIMAL(8, 2), nullable=False)
     close = Column(DECIMAL(8, 2), nullable=False)
     high = Column(DECIMAL(8, 2), nullable=False)
     low = Column(DECIMAL(8, 2), nullable=False)
     vol = Column(Integer, nullable=False)
 
-    def fill_data_15min(self, stock_index: str, **kwargs):
+    def fill_data_15min(self, **kwargs):
         time_str = kwargs['day']
         time_obj = datetime.fromisoformat(time_str)
-        the_time = time_obj.time()
+        the_time = str(time_obj.time())
 
-        self.attr_name = stock_index + "_min_15"
-        self.stock_index = int(stock_index)
+        self.stock_index = kwargs['stock_index']
+        self.attr_name = self.stock_index + "_min_15"
         self.date = str(time_obj.date())
         self.seq_index = get_sequence_by_time(the_time)
         self.open = float(kwargs['open'])
@@ -81,8 +81,14 @@ class Quotation(SqlAlchemy_Base_Model):
         self.low = float(kwargs['low'])
         self.vol = int(kwargs['volume'])
 
+    @classmethod
+    def create_all_tables(cls, db_engine):
+        SqlAlchemy_Base_Model.metadata.create_all(db_engine)
+        return
 
-def get_table_model_cls(table_name):
+
+def get_price_table_cls(table_name):
+    table_name = 'timeshare_' + table_name
     # 省着重新建类
     global price_table_cls_dict
     if table_name not in price_table_cls_dict:
@@ -90,17 +96,3 @@ def get_table_model_cls(table_name):
         cls = type(cls_name, (Quotation,), {'__tablename__': table_name})
         price_table_cls_dict[table_name] = cls
     return price_table_cls_dict[table_name]
-
-
-class PriceDao:
-
-    def set_price_blocks_to_db(block_list, stock_index, date_str, index):
-        # Session = sessionmaker(bind=ENGINE, autocommit=False, autoflush=False)
-        pass
-
-    # 把所有周期都得出结果
-    def sync_scan_and_process_statistics_from_disk(self, stock_index, end_date, count=20):
-        pass
-
-    def sync_scan_and_process_statistics_from_sina_net(self, stock_index, end_date, count=20):
-        pass

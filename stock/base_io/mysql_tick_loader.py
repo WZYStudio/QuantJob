@@ -1,22 +1,15 @@
 import sqlalchemy
-from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
-import stock.csv_loader as csv_loader
-from stock.csv_loader import get_month_data_dir
+import stock.base_io.csv_loader as csv_loader
+from stock.base_io.csv_loader import get_month_data_dir
 import pandas as pd
 import numpy as np
 import os
-from multiprocessing import Process, Queue
+from stock.base_io import mysql_helper
 
 np.set_printoptions(suppress=True)
 
 TICK_PREFIX = 'Tick2_'
-
-db_engine = None
-
-
-def get_db_url(db_name):
-    return "mysql+pymysql://wzy:123@192.168.50.100/" + db_name + "?charset=utf8";
 
 
 def get_db_name(date_str):
@@ -26,18 +19,16 @@ def get_db_name(date_str):
 def make_db_by_datestr(date_str):
     # 依照日期  创建并使用库
     db_name = get_db_name(date_str)
-    url = get_db_url(db_name)
+    db_engine = mysql_helper.get_db_engine_by_name(db_name, echo=True)
 
-    global db_engine
-    if not db_engine:
-        db_engine = create_engine(url, echo=True)
-
-    if not database_exists(url):
-        create_database(url)
-
-    # 非常寸、带横杠的数据库名，要用反引号 引上才可以用， 否则sql报错
-    use_db_dialect = 'USE ' + "`" + db_name + "`"
-    db_engine.execute(use_db_dialect)
+    # 我放到mysql_helper中了
+    # url = mysql_helper.get_db_url(db_name)
+    # if not database_exists(url):
+    #     create_database(url)
+    #
+    # # 非常寸、带横杠的数据库名，要用反引号 引上才可以用， 否则sql报错
+    # use_db_dialect = 'USE ' + "`" + db_name + "`"
+    # db_engine.execute(use_db_dialect)
 
     return db_engine
 

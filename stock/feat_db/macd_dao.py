@@ -1,5 +1,5 @@
-from stock.dao_indicator.indicator_types import IndicatorType
-from stock.dao_indicator.helper import KLineBlock
+from stock.feat_db.indicator_types import IndicatorType
+from stock.feat_db.helper import KLineBlock
 from enum import Enum, unique
 
 

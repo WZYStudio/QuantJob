@@ -13,6 +13,11 @@ session = None
 
 
 def get_sina_quotation_pure_txt(stock_code, scale, datalen):
+    if stock_code.startswith('6'):
+        stock_code = 'sh' + stock_code
+    elif stock_code.startswith('3') or stock_code.startswith('0'):
+        stock_code = 'sz' + stock_code
+
     links = 'http://money.finance.sina.com.cn/quotes_service/api/jsonp_v2.php/var=/CN_MarketData.getKLineData?symbol=' + stock_code + '&scale=' + str(
         scale) + '&ma=no&datalen=' + str(datalen)
 
@@ -40,4 +45,4 @@ def get_sina_quotation_dict_list(stock_code, scale, datalen):
 
 
 if __name__ == "__main__":
-    get_sina_quotation_dict_list('sh600196', '15', '20')
+    get_sina_quotation_dict_list('002074', '15', '20')
