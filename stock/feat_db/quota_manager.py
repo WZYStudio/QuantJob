@@ -33,6 +33,12 @@ def input_dict_to_db(stock_index: str, dict_data):
     for item in dict_data:
         time_str = item['day']
         time_obj = datetime.fromisoformat(time_str)
+
+        # 本周期未完全完结，但数据下载下来的这种，当然是不能插入
+        if datetime.now().__le__(time_obj):
+            print('MarketTime greater than now :' + str(time_obj) + " vs " + str(datetime.now()))
+            continue
+
         item['date'] = date_str = str(time_obj.date())
         item['stock_index'] = stock_index
 
@@ -60,4 +66,4 @@ def init_market_data(stock_index: str):
 if __name__ == "__main__":
     # get_favor_stock_list()
     init_market_data('002074')
-    init_market_data('300465')
+    # init_market_data('300465')

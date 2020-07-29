@@ -1,6 +1,6 @@
 from stock.feat_db.base_types import IndicatorType, KLineBlock
 from enum import Enum, unique
-from sqlalchemy import Column, Integer, String, DECIMAL
+from sqlalchemy import Column, Integer, String, DECIMAL, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 from stock.feat_db.base_types import TIME_DELTA_LIST
@@ -57,7 +57,7 @@ class Quotation(SqlAlchemy_Base_Model):
     row_code = Column(String(25), primary_key=True)
     attr_name = Column(String(25), nullable=False)
     stock_index = Column(String(6), nullable=False)
-    # date = Column(Date, nullable=False), 一天一个表，不用date都行，时间都在表名上了
+    date_time = Column(DateTime, nullable=False)
     seq_index = Column(Integer, nullable=False)
     open = Column(DECIMAL(8, 2), nullable=False)
     close = Column(DECIMAL(8, 2), nullable=False)
@@ -72,6 +72,7 @@ class Quotation(SqlAlchemy_Base_Model):
 
         self.stock_index = kwargs['stock_index']
         self.attr_name = self.stock_index + "_min_15"
+        self.date_time = time_obj
         self.seq_index = get_sequence_by_time(the_time)
         self.row_code = self.attr_name + "_" + str(self.seq_index)
         self.open = float(kwargs['open'])
