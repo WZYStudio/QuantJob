@@ -45,7 +45,9 @@ def input_dict_to_db(stock_index: str, dict_data):
         table_cls = price_dao.get_price_table_cls(date_str)
         table_obj = table_cls()
         table_obj.fill_data_15min(**item)
-        get_db_session().add(table_obj)
+        # get_db_session().add(table_obj)
+        # session merge的强大作用 : 如果是新的数据就插入， 如果是已经存在的数据，就更新。这个事add并做不了
+        get_db_session().merge(table_obj)
 
     price_dao.Quotation.create_all_tables(get_db_engine())
     try:
