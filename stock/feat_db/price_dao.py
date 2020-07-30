@@ -2,8 +2,9 @@ from stock.feat_db.base_types import IndicatorType, KLineBlock
 from enum import Enum, unique
 from sqlalchemy import Column, Integer, String, DECIMAL, DateTime
 from sqlalchemy.ext.declarative import declarative_base
+from stock.feat_db.base_types import TIME_DELTA_LIST, get_db_session, get_db_engine
+import stock.feat_db.price_dao as price_dao
 from datetime import datetime
-from stock.feat_db.base_types import TIME_DELTA_LIST
 
 price_table_cls_dict = {}
 
@@ -50,6 +51,45 @@ SqlAlchemy_Base_Model = declarative_base()
 #         self._vol = vol
 
 
+def input_price_dict_to_db(stock_index: str, dict_data):
+    db_obj_list = []
+    for item in dict_data:
+        time_str = item['day']
+        time_obj = datetime.fromisoformat(time_str)
+
+        # 本周期未完全完结，但数据下载下来的这种，当然是不能插入
+        if datetime.now().__le__(time_obj):
+            print('MarketTime greater than now :' + str(time_obj) + " vs " + str(datetime.now()))
+            continue
+
+        item['date'] = date_str = str(time_obj.date())
+        item['stock_index'] = stock_index
+
+        table_cls = get_price_table_cls(date_str)
+        table_obj = table_cls()
+        table_obj.fill_data_15min(**item)
+        db_obj_list.append(table_obj)
+
+        # get_db_session().add(table_obj)
+        # session merge的强大作用 : 如果是新的数据就插入， 如果是已经存在的数据，就更新。这个事add并做不了
+        # get_db_session().merge(table_obj)
+
+    price_dao.Quotation.create_all_tables(get_db_engine())
+    for item in db_obj_list:
+        get_db_session().merge(item)
+    try:
+        get_db_session().commit()
+    except Exception as err:
+        print('DB_ERR:' + str(err))
+
+    finally:
+        get_db_session().close()
+
+
+def get_min15_price_list(day_time, index, count):
+    pass
+
+
 class Quotation(SqlAlchemy_Base_Model):
     __abstract__ = True  # 关键语句,定义所有数据库表对应的父类
     __table_args__ = {"extend_existing": True}  # 允许表已存在
@@ -63,7 +103,7 @@ class Quotation(SqlAlchemy_Base_Model):
     close = Column(DECIMAL(8, 2), nullable=False)
     high = Column(DECIMAL(8, 2), nullable=False)
     low = Column(DECIMAL(8, 2), nullable=False)
-    vol = Column(Integer, nullable=False)
+    volume = Column(Integer, nullable=False)
 
     def fill_data_15min(self, **kwargs):
         time_str = kwargs['day']
@@ -79,7 +119,7 @@ class Quotation(SqlAlchemy_Base_Model):
         self.close = float(kwargs['close'])
         self.high = float(kwargs['high'])
         self.low = float(kwargs['low'])
-        self.vol = int(kwargs['volume'])
+        self.volume = int(kwargs['volume'])
 
     @classmethod
     def create_all_tables(cls, db_engine):

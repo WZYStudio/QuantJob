@@ -3,11 +3,23 @@ from enum import Enum, unique
 import abc
 from sqlalchemy import Column, Integer, INTEGER, String, Date, DECIMAL, Boolean
 from sqlalchemy.ext.declarative import declarative_base
+import stock.base_io.mysql_helper as mysql_helper
 
 TIME_DELTA_LIST = ["09:45:00", "10:00:00", "10:15:00", "10:30:00", "10:45:00", "11:00:00", "11:15:00", "11:30:00", "13:15:00", "13:30:00", "13:45:00",
                    "14:00:00", "14:15:00", "14:30:00", "14:45:00", "15:00:00"]
 
 SqlAlchemy_Base_Model = declarative_base()
+
+STOCK_TIMESHARE_DB_NAME = 'StockTimeShare'
+
+
+def get_db_engine():
+    return mysql_helper.get_db_engine_by_name(STOCK_TIMESHARE_DB_NAME)
+
+
+def get_db_session():
+    session = mysql_helper.get_db_session_by_name(STOCK_TIMESHARE_DB_NAME)
+    return session
 
 
 @unique
