@@ -23,7 +23,8 @@ def mac_time():
 # 看得出background_scheduler 自己维护循环，虽然够用，但不是那么好,总感觉有点奇怪, 但是这个也许可以写在 单独的进程里，就不干扰我做事了
 def run_background_scheduler():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(mac_time, 'interval', minutes=15, start_date='2020-07-19 18:15:00', end_date='2020-07-19 21:00:00')
+    # scheduler.add_job(mac_time, 'interval', minutes=15, start_date='2020-07-19 18:15:00', end_date='2020-07-19 21:00:00')
+    scheduler.add_job(mac_time, 'interval', minutes=2)
     scheduler.start()
 
     print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
