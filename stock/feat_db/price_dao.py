@@ -6,10 +6,6 @@ from stock.feat_db.base_types import TIME_DELTA_LIST, get_db_session, get_db_eng
 import stock.feat_db.price_dao as price_dao
 from datetime import datetime
 import math
-import numpy
-import talib
-import pandas as pd
-from pandas import DataFrame
 
 price_table_cls_dict = {}
 
@@ -114,9 +110,12 @@ def get_min15_price_list(stock_index: str, end_date, end_table_seq_index, block_
     begin_table_index = end_table_index - diff_date_count
     begin_table = tables[begin_table_index]
 
-    full_diff_count = math.floor((block_count - end_table_seq_index) / 16)
-    # 源于 (16-begin_index)+1+(diff_count*16)=count-index
-    begin_table_seq_index = 17 + full_diff_count * 16 + end_table_seq_index - block_count
+    if (block_count - end_table_seq_index) % 16 == 0:
+        begin_table_seq_index = 1
+    else:
+        full_diff_count = math.floor((block_count - end_table_seq_index) / 16)
+        # 源于 (16-begin_index)+1+(diff_count*16)=count-index
+        begin_table_seq_index = 17 + full_diff_count * 16 + end_table_seq_index - block_count
 
     data_list = []
     scan_table_list = tables[begin_table_index:end_table_index + 1]
@@ -189,26 +188,5 @@ def get_price_table_cls(table_name, have_prefix=False):
     return price_table_cls_dict[table_name]
 
 
-def my_macd(data, short_, long_, m):
-    '''
-    data是包含高开低收成交量的标准dataframe
-    short_,long_,m分别是macd的三个参数
-    返回值是包含原始数据和diff,dea,macd三个列的dataframe
-    '''
-    data['diff'] = data['close'].ewm(adjust=False, alpha=2 / (short_ + 1), ignore_na=True).mean() - \
-                   data['close'].ewm(adjust=False, alpha=2 / (long_ + 1), ignore_na=True).mean()
-    data['dea'] = data['diff'].ewm(adjust=False, alpha=2 / (m + 1), ignore_na=True).mean()
-    data['macd'] = 2 * (data['diff'] - data['dea'])
-    return data
-
-
 if __name__ == "__main__":
-    close_price_list = get_min15_close_price_list('002074', '2020-07-31', 16, 34)
-    nd_close_price_list = numpy.array(close_price_list)
-    df = DataFrame(close_price_list, columns=['close'])
-
-    macd_result = talib.MACD(nd_close_price_list, fastperiod=12, slowperiod=26, signalperiod=9)
-
-    macd_result2 = my_macd(df, 12, 26, 9)
-
-    print('end')
+    close_price_list = price_dao.get_min15_close_price_list('002074', '2020-07-31', 16, 80)
